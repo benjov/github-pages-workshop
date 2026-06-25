@@ -1,0 +1,20 @@
+# Claude Code (configuración local e instrucciones internas, no van al repo)
+.claude/
+CLAUDE.md
+FACILITACION.md
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos temporales
+*.tmp
+*.bak

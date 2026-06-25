@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De cero a online — Workshop Slides</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ── Variables ─────────────────────────────────────────── */
+        :root {
+            --bg:        #0f172a;
+            --bg2:       #1e293b;
+            --bg3:       #334155;
+            --text:      #e2e8f0;
+            --muted:     #94a3b8;
+            --acento:    #38bdf8;
+            --verde:     #4ade80;
+            --amarillo:  #fbbf24;
+            --rojo:      #f87171;
+            --fuente:      'Inter', system-ui, sans-serif;
+            --fuente-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        /* ── Reset ─────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        /* ── Contenedor principal ──────────────────────────────── */
+        .presentacion {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* ── Diapositiva base ──────────────────────────────────── */
+        .diapositiva {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem 7rem;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--fuente);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .diapositiva.activa {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ── Tipografía base ───────────────────────────────────── */
+        h1 {
+            font-family: var(--fuente-mono);
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--text);
+        }
+
+        h2 {
+            font-family: var(--fuente-mono);
+            font-size: clamp(1.5rem, 3vw, 2.4rem);
+            font-weight: 700;
+            color: var(--acento);
+            margin-bottom: 1.5rem;
+        }
+
+        p, li {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            line-height: 1.65;
+            color: var(--text);
+        }
+
+        .muted { color: var(--muted); }
+
+        /* ── Listas ────────────────────────────────────────────── */
+        .lista {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .lista li {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .lista li::before {
+            content: '→';
+            color: var(--acento);
+            font-family: var(--fuente-mono);
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 0.05em;
+        }
+
+        .lista.check li::before { content: '✓'; color: var(--verde); }
+        .lista.num   { counter-reset: item; }
+        .lista.num li::before {
+            counter-increment: item;
+            content: counter(item) '.';
+            color: var(--acento);
+            min-width: 1.6rem;
+        }
+
+        /* ── Etiqueta de bloque (timing) ───────────────────────── */
+        .etiqueta-bloque {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg2);
+            color: var(--muted);
+            border: 1px solid var(--bg3);
+            padding: 0.3rem 0.9rem;
+            border-radius: 999px;
+            font-family: var(--fuente-mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            width: fit-content;
+        }
+
+        .etiqueta-bloque .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--acento);
+        }
+
+        /* ── Código inline ─────────────────────────────────────── */
+        .ic {
+            background: var(--bg2);
+            color: var(--acento);
+            font-family: var(--fuente-mono);
+            font-size: 0.9em;
+            padding: 0.15em 0.5em;
+            border-radius: 5px;
+            border: 1px solid var(--bg3);
+        }
+
+        /* ── Bloque de código ──────────────────────────────────── */
+        .bloque-codigo {
+            background: #0d1117;
+            border: 1px solid var(--bg3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .codigo-barra {
+            background: var(--bg2);
+            padding: 0.4rem 1rem;
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .codigo-barra span {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+        .codigo-barra span:nth-child(1) { background: #f87171; }
+        .codigo-barra span:nth-child(2) { background: #fbbf24; }
+        .codigo-barra span:nth-child(3) { background: #4ade80; }
+        .codigo-barra .codigo-nombre {
+            margin-left: 0.5rem;
+            color: var(--muted);
+            font-family: var(--fuente-mono);
+            font-size: 0.78rem;
+            width: auto; height: auto;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        pre {
+            padding: 1.25rem 1.5rem;
+            overflow-x: auto;
+            font-family: var(--fuente-mono);
+            font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+            line-height: 1.7;
+            color: #d4d4d4;
+        }
+
+        .c-tag     { color: #569cd6; }
+        .c-attr    { color: #9cdcfe; }
+        .c-val     { color: #ce9178; }
+        .c-comment { color: #6a9955; }
+        .c-key     { color: #38bdf8; }
+        .c-verde   { color: #4ade80; }
+
+        /* ── URL grande ────────────────────────────────────────── */
+        .url-grande {
+            font-family: var(--fuente-mono);
+            font-size: clamp(1.3rem, 2.8vw, 2rem);
+            color: var(--acento);
+            background: var(--bg2);
+            border: 2px solid var(--bg3);
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            margin: 1rem 0;
+            display: inline-block;
+        }
+
+        /* ── Separador ─────────────────────────────────────────── */
+        .separador {
+            width: 60px; height: 3px;
+            background: var(--acento);
+            border-radius: 2px;
+            margin: 1rem 0 1.5rem;
+        }
+
+        /* ── Cards en grid ─────────────────────────────────────── */
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .mini-card {
+            background: var(--bg2);
+            border: 1px solid var(--bg3);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .mini-card .titulo {
+            font-family: var(--fuente-mono);
+            font-weight: 700;
+            color: var(--acento);
+            font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+            margin-bottom: 0.4rem;
+        }
+
+        .mini-card p {
+            font-size: clamp(0.8rem, 1.3vw, 1rem);
+            color: var(--muted);
+        }
+
+        /* ── Tabla de agenda ───────────────────────────────────── */
+        .agenda {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .agenda-item {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--bg2);
+        }
+
+        .agenda-item:last-child { border-bottom: none; }
+
+        .agenda-tiempo {
+            font-family: var(--fuente-mono);
+            font-size: clamp(0.8rem, 1.3vw, 1rem);
+            color: var(--acento);
+            font-weight: 600;
+        }
+
+        .agenda-titulo {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            color: var(--text);
+        }
+
+        .agenda-item.destacado .agenda-titulo {
+            color: var(--verde);
+            font-weight: 700;
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           TIPOS DE DIAPOSITIVA
+           ═══════════════════════════════════════════════════════ */
+
+        /* ── Portada ───────────────────────────────────────────── */
+        .s-portada {
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .s-portada h1 { font-size: clamp(2.2rem, 5vw, 4rem); }
+
+        .portada-sub {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            color: var(--muted);
+            margin: 1.5rem 0 2.5rem;
+        }
+
+        .portada-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .portada-meta span {
+            font-family: var(--fuente-mono);
+            font-size: clamp(0.85rem, 1.5vw, 1rem);
+            color: var(--muted);
+        }
+
+        .portada-meta a {
+            color: var(--acento);
+            text-decoration: none;
+        }
+
+        .portada-meta a:hover { text-decoration: underline; }
+
+        .portada-acento {
+            color: var(--acento);
+        }
+
+        .portada-linea {
+            width: 80px; height: 4px;
+            background: var(--acento);
+            border-radius: 2px;
+            margin: 1.5rem 0;
+        }
+
+        /* ── PAUSA ACTIVA ──────────────────────────────────────── */
+        .s-pausa {
+            background: linear-gradient(150deg, #052e16 0%, #0f172a 65%);
+        }
+
+        .pausa-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--verde);
+            color: #052e16;
+            padding: 0.45rem 1.1rem;
+            border-radius: 999px;
+            font-family: var(--fuente-mono);
+            font-weight: 700;
+            font-size: clamp(0.75rem, 1.3vw, 0.95rem);
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            width: fit-content;
+        }
+
+        .pausa-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: #052e16;
+            animation: pulso 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulso {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.5; transform: scale(0.75); }
+        }
+
+        .s-pausa h2 { color: var(--verde); }
+
+        .s-pausa .lista li::before { color: var(--verde); }
+
+        .instruccion-grande {
+            font-family: var(--fuente-mono);
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            color: var(--verde);
+            background: rgba(74, 222, 128, 0.08);
+            border: 1.5px solid rgba(74, 222, 128, 0.25);
+            border-radius: 10px;
+            padding: 0.75rem 1.25rem;
+            margin-top: 1rem;
+        }
+
+        /* ── Cierre ────────────────────────────────────────────── */
+        .s-cierre {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .s-cierre h1 { font-size: clamp(2rem, 4vw, 3.2rem); }
+
+        /* ── Precios ───────────────────────────────────────────── */
+        .precios {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            margin: 1.25rem 0;
+        }
+
+        .precio-fila {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            background: var(--bg2);
+            border-radius: 8px;
+            gap: 2rem;
+        }
+
+        .precio-fila.destacado {
+            border: 1.5px solid var(--verde);
+        }
+
+        .precio-label {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            color: var(--text);
+        }
+
+        .precio-valor {
+            font-family: var(--fuente-mono);
+            font-weight: 700;
+            font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+            color: var(--acento);
+        }
+
+        /* ── Controles de navegación ───────────────────────────── */
+        .controles {
+            position: fixed;
+            bottom: 0;
+            left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-top: 1px solid var(--bg2);
+            z-index: 200;
+            cursor: default;
+        }
+
+        .btn-nav {
+            background: var(--bg2);
+            color: var(--muted);
+            border: 1px solid var(--bg3);
+            border-radius: 7px;
+            padding: 0.35rem 0.9rem;
+            font-family: var(--fuente-mono);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-nav:hover { background: var(--bg3); color: var(--text); }
+        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .progreso-barra {
+            flex-grow: 1;
+            height: 4px;
+            background: var(--bg3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progreso-fill {
+            height: 100%;
+            background: var(--acento);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .contador {
+            font-family: var(--fuente-mono);
+            font-size: 0.85rem;
+            color: var(--muted);
+            flex-shrink: 0;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* ── Hint de teclado ───────────────────────────────────── */
+        .hint-teclado {
+            position: fixed;
+            bottom: 4.5rem;
+            right: 1.5rem;
+            background: rgba(30, 41, 59, 0.9);
+            color: var(--muted);
+            font-family: var(--fuente-mono);
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--bg3);
+            z-index: 200;
+            opacity: 1;
+            transition: opacity 1s ease;
+            cursor: default;
+        }
+
+        .hint-teclado.oculto { opacity: 0; pointer-events: none; }
+
+        /* ── Decoración de fondo ───────────────────────────────── */
+        .deco-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .diapositiva > * { position: relative; z-index: 1; }
+
+        /* ── Impresión / PDF ───────────────────────────────────── */
+        @media print {
+            .controles, .hint-teclado { display: none !important; }
+
+            .presentacion {
+                width: 100%;
+                height: auto;
+                overflow: visible;
+            }
+
+            .diapositiva {
+                position: relative;
+                opacity: 1 !important;
+                pointer-events: auto;
+                page-break-after: always;
+                height: 100vh;
+                break-after: page;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="presentacion" id="presentacion">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 1 — PORTADA
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva s-portada activa" id="slide-1">
+        <div class="deco-grid"></div>
+        <div class="etiqueta-bloque"><span class="dot"></span> Workshop gratuito · FES Acatlán UNAM</div>
+        <h1>De cero a<br><span class="portada-acento">online:</span><br>Tu portafolio de<br>ciencia de datos</h1>
+        <div class="portada-linea"></div>
+        <p class="portada-sub">90 minutos · Sin instalar nada · Solo con tu navegador</p>
+        <div class="portada-meta">
+            <span>Benjamín Oliva</span>
+            <span>Centro de Educación Continua · FES Acatlán UNAM</span>
+            <span style="color:var(--acento); font-weight:600">📅 10 de julio de 2026 · 6:00 PM CDMX</span>
+            <span>Registro: <a href="https://cuaed-unam-mx.zoom.us/meeting/register/s4ugfalOQBuy3VYeQSRwYg" target="_blank">cuaed-unam-mx.zoom.us/meeting/register/...</a></span>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 2 — ¿QUÉ LOGRARÁS HOY?
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-2">
+        <div class="deco-grid"></div>
+        <h2>Al terminar esta sesión vas a tener...</h2>
+        <ul class="lista check">
+            <li>Una cuenta de GitHub activa</li>
+            <li>Un repositorio personal publicado en internet</li>
+            <li>Tu nombre, foto y proyectos en una URL real</li>
+            <li>Un link que puedes poner en tu CV hoy mismo</li>
+        </ul>
+        <br>
+        <p class="muted">Sin instalar nada. Todo desde el navegador.</p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 3 — AGENDA
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-3">
+        <div class="deco-grid"></div>
+        <h2>La ruta de hoy</h2>
+        <div class="agenda">
+            <div class="agenda-item">
+                <span class="agenda-tiempo">0:00</span>
+                <span class="agenda-titulo">Bienvenida y contexto</span>
+            </div>
+            <div class="agenda-item">
+                <span class="agenda-tiempo">0:10</span>
+                <span class="agenda-titulo">Cuenta de GitHub</span>
+            </div>
+            <div class="agenda-item">
+                <span class="agenda-tiempo">0:20</span>
+                <span class="agenda-titulo">El repositorio especial</span>
+            </div>
+            <div class="agenda-item destacado">
+                <span class="agenda-tiempo">0:35</span>
+                <span class="agenda-titulo">✦ Personaliza tu página ← el corazón del taller</span>
+            </div>
+            <div class="agenda-item">
+                <span class="agenda-tiempo">1:00</span>
+                <span class="agenda-titulo">Agrega proyectos a tu portafolio</span>
+            </div>
+            <div class="agenda-item">
+                <span class="agenda-tiempo">1:15</span>
+                <span class="agenda-titulo">El Diplomado: qué sigue después</span>
+            </div>
+            <div class="agenda-item">
+                <span class="agenda-tiempo">1:25</span>
+                <span class="agenda-titulo">Preguntas y cierre</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 4 — ¿POR QUÉ UN PORTAFOLIO?
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-4">
+        <div class="deco-grid"></div>
+        <div class="etiqueta-bloque"><span class="dot"></span> Bloque 1 · 10 min</div>
+        <h2>¿Por qué importa tener un portafolio?</h2>
+        <div class="separador"></div>
+        <p>En ciencias sociales y humanidades:</p>
+        <br>
+        <ul class="lista">
+            <li>La mayoría tiene Word, Excel, PowerPoint.</li>
+            <li>Muy pocos tienen <strong style="color:var(--acento)">código publicado y visible</strong>.</li>
+            <li>Un portafolio demuestra lo que sabes hacer, <br>no solo lo que estudias.</li>
+            <li>Es la diferencia en un proceso de selección.</li>
+        </ul>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 5 — GITHUB PAGES
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-5">
+        <div class="deco-grid"></div>
+        <h2>¿Por qué GitHub Pages?</h2>
+        <div class="separador"></div>
+        <ul class="lista check">
+            <li>Gratuito para siempre — sin planes de pago</li>
+            <li>URL profesional: <span class="ic">tu-nombre.github.io</span></li>
+            <li>Sin anuncios, sin límites de tráfico</li>
+            <li>Respetado en la academia y la industria</li>
+            <li>Funciona con un solo archivo <span class="ic">index.html</span></li>
+        </ul>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 6 — PAUSA: CREAR CUENTA
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva s-pausa" id="slide-6">
+        <div class="deco-grid"></div>
+        <div class="pausa-badge"><span class="pausa-dot"></span> HAZLO AHORA</div>
+        <div class="etiqueta-bloque"><span class="dot"></span> Bloque 2 · 10 min</div>
+        <h2>Crea tu cuenta de GitHub</h2>
+        <ul class="lista num">
+            <li>Ve a <span class="ic">github.com/signup</span> en tu navegador</li>
+            <li>Escribe tu correo y crea una contraseña</li>
+            <li>Elige tu <strong style="color:var(--verde)">nombre de usuario</strong> — aparecerá en tu URL</li>
+            <li>Verifica tu correo cuando llegue el mensaje</li>
+        </ul>
+        <div class="instruccion-grande">
+            Tip: usa tu nombre real, ej. <span style="color:#e2e8f0">maria-garcia</span><br>
+            Evita números y caracteres especiales.
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 7 — EL TRUCO ESPECIAL
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-7">
+        <div class="deco-grid"></div>
+        <div class="etiqueta-bloque"><span class="dot"></span> Bloque 3 · 15 min</div>
+        <h2>El nombre mágico</h2>
+        <div class="separador"></div>
+        <p>GitHub publica tu página automáticamente cuando<br>el repositorio se llama <strong style="color:var(--verde)">exactamente así</strong>:</p>
+        <div class="url-grande">tu-usuario.github.io</div>
+        <ul class="lista" style="margin-top:1rem">
+            <li>Si tu usuario es <span class="ic">mgarcia</span> → crea el repo <span class="ic">mgarcia.github.io</span></li>
+            <li>GitHub publica en → <span class="ic" style="color:var(--verde)">https://mgarcia.github.io</span></li>
+            <li>No necesitas configurar nada más</li>
+        </ul>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 8 — PAUSA: CREAR REPOSITORIO
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva s-pausa" id="slide-8">
+        <div class="deco-grid"></div>
+        <div class="pausa-badge"><span class="pausa-dot"></span> HAZLO AHORA</div>
+        <h2>Crea tu repositorio</h2>
+        <ul class="lista num">
+            <li>Dentro de GitHub, haz clic en el botón <span class="ic">New</span> (o el <span class="ic">+</span>)</li>
+            <li>En <strong style="color:var(--verde)">Repository name</strong>, escribe: <span class="ic">tu-usuario.github.io</span></li>
+            <li>Selecciona <strong style="color:var(--verde)">Public</strong></li>
+            <li>Clic en <span class="ic">Create repository</span></li>
+        </ul>
+        <div class="instruccion-grande">
+            ⚠️ El nombre debe coincidir exactamente con tu usuario<br>
+            incluyendo mayúsculas y minúsculas.
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 9 — LA PLANTILLA
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-9">
+        <div class="deco-grid"></div>
+        <div class="etiqueta-bloque"><span class="dot"></span> Bloque 4 · 25 min</div>
+        <h2>No empiezas de cero</h2>
+        <div class="separador"></div>
+        <p>Tienes una plantilla lista para personalizar:</p>
+        <br>
+        <div class="mini-grid">
+            <div class="mini-card">
+                <div class="titulo">Un solo archivo</div>
+                <p>HTML + CSS + todo en <span class="ic">index.html</span>. Sin instalar nada.</p>
+            </div>
+            <div class="mini-card">
+                <div class="titulo">Comentarios guía</div>
+                <p>Busca <span class="ic">CAMBIA ESTO:</span> para saber qué editar.</p>
+            </div>
+            <div class="mini-card">
+                <div class="titulo">Diseño completo</div>
+                <p>Hero, proyectos, habilidades, contacto. Mobile-friendly.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 10 — PAUSA: SUBIR LA PLANTILLA
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva s-pausa" id="slide-10">
+        <div class="deco-grid"></div>
+        <div class="pausa-badge"><span class="pausa-dot"></span> HAZLO AHORA</div>
+        <h2>Sube tu primera página</h2>
+        <ul class="lista num">
+            <li>En tu repositorio vacío, clic en <span class="ic">Add file › Create new file</span></li>
+            <li>Nombre del archivo: <span class="ic" style="color:var(--verde)">index.html</span></li>
+            <li>Pega el contenido de la plantilla del workshop</li>
+            <li>Baja hasta el final y clic en <span class="ic">Commit changes</span></li>
+        </ul>
+        <div class="instruccion-grande">
+            ⏱ Espera 1–2 minutos antes de ver tu página publicada.
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 11 — PAUSA: PERSONALIZAR
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva s-pausa" id="slide-11">
+        <div class="deco-grid"></div>
+        <div class="pausa-badge"><span class="pausa-dot"></span> PERSONALIZA</div>
+        <h2>Haz la página tuya</h2>
+        <p style="color: var(--muted); margin-bottom: 1rem;">En GitHub, abre <span class="ic">index.html</span> y haz clic en el lápiz ✏️ para editar.</p>
+        <div class="bloque-codigo">
+            <div class="codigo-barra">
+                <span></span><span></span><span></span>
+                <span class="codigo-nombre">index.html — busca y cambia estos valores</span>
+            </div>
+            <pre><code><span class="c-comment">&lt;!-- Pon la primera letra de tu nombre --&gt;</span>
+<span class="c-tag">&lt;div</span> <span class="c-attr">class</span>=<span class="c-val">"avatar"</span> <span class="c-attr">data-inicial</span>=<span class="c-val">"<span class="c-verde">M</span>"</span><span class="c-tag">&gt;</span>
+
+<span class="c-tag">&lt;h1</span> <span class="c-attr">class</span>=<span class="c-val">"hero-nombre"</span><span class="c-tag">&gt;</span><span class="c-verde">María García López</span><span class="c-tag">&lt;/h1&gt;</span>
+<span class="c-tag">&lt;p</span>  <span class="c-attr">class</span>=<span class="c-val">"hero-titulo"</span><span class="c-tag">&gt;</span><span class="c-verde">Socióloga · Analista de datos</span><span class="c-tag">&lt;/p&gt;</span>
+
+<span class="c-tag">&lt;a</span> <span class="c-attr">href</span>=<span class="c-val">"mailto:<span class="c-verde">mi-correo@ejemplo.com</span>"</span><span class="c-tag">&gt;</span>✉ Escríbeme<span class="c-tag">&lt;/a&gt;</span></code></pre>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 12 — TU PÁGINA PUBLICADA
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-12">
+        <div class="deco-grid"></div>
+        <h2>El momento de verdad</h2>
+        <div class="separador"></div>
+        <p>Abre una nueva pestaña y escribe tu URL:</p>
+        <div class="url-grande">https://tu-usuario.github.io</div>
+        <br>
+        <p style="color:var(--muted)">Si no aparece todavía:</p>
+        <ul class="lista" style="margin-top:0.5rem">
+            <li>Espera 1–2 minutos más</li>
+            <li>Recarga con <span class="ic">Ctrl+Shift+R</span> (o <span class="ic">Cmd+Shift+R</span> en Mac)</li>
+            <li>Verifica que el archivo se llame exactamente <span class="ic">index.html</span></li>
+        </ul>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 13 — PAUSA: ¡COMPARTE!
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva s-pausa" id="slide-13">
+        <div class="deco-grid"></div>
+        <div class="pausa-badge"><span class="pausa-dot"></span> ¡LO LOGRASTE!</div>
+        <h1 style="color:var(--verde); font-size: clamp(2rem, 4vw, 3rem);">🎉 Tu página ya está en internet</h1>
+        <br>
+        <p style="font-size: clamp(1rem, 2vw, 1.4rem); color: var(--text);">
+            Pega tu URL en el chat del webinar:
+        </p>
+        <div class="instruccion-grande" style="font-size: clamp(1.1rem, 2.2vw, 1.7rem);">
+            https://tu-usuario.github.io
+        </div>
+        <br>
+        <p class="muted">Es permanente, gratuita y puedes ponerla en tu CV hoy mismo.</p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 14 — PORTAFOLIO DE PROYECTOS
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-14">
+        <div class="deco-grid"></div>
+        <div class="etiqueta-bloque"><span class="dot"></span> Bloque 5 · 15 min</div>
+        <h2>Para crecer: el portafolio de proyectos</h2>
+        <div class="separador"></div>
+        <p>La plantilla ya tiene 3 tarjetas de proyectos listas. Solo cambia:</p>
+        <br>
+        <ul class="lista">
+            <li><strong style="color:var(--acento)">Nombre</strong> del proyecto</li>
+            <li><strong style="color:var(--acento)">Descripción</strong> — qué hiciste y qué respondiste</li>
+            <li><strong style="color:var(--acento)">Tecnologías</strong> — Python, Pandas, R, SQL…</li>
+            <li><strong style="color:var(--acento)">Links</strong> — demo y código en GitHub</li>
+        </ul>
+        <br>
+        <p class="muted">¿No tienes proyectos aún? Con el diplomado tendrás 6+ proyectos reales para llenar estas tarjetas.</p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 15 — EL DIPLOMADO
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-15">
+        <div class="deco-grid"></div>
+        <div class="etiqueta-bloque"><span class="dot"></span> Bloque 6 · 5 min</div>
+        <h2>¿Qué aprenderías en 240 horas?</h2>
+        <div class="separador"></div>
+        <div class="mini-grid">
+            <div class="mini-card">
+                <div class="titulo">Python para datos</div>
+                <p>Pandas, NumPy, visualización, estadística aplicada.</p>
+            </div>
+            <div class="mini-card">
+                <div class="titulo">Machine Learning</div>
+                <p>Clasificación, regresión, clustering con Scikit-learn.</p>
+            </div>
+            <div class="mini-card">
+                <div class="titulo">NLP</div>
+                <p>Análisis de texto, sentiment, modelos de lenguaje.</p>
+            </div>
+        </div>
+        <br>
+        <p class="muted" style="font-size:clamp(0.85rem,1.4vw,1rem)">
+            Todo aplicado a datos de ciencias sociales y humanidades —<br>
+            tweets políticos, textos históricos, datos censales, prensa, etc.
+        </p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 16 — INSCRIPCIONES Y PRECIOS
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva" id="slide-16">
+        <div class="deco-grid"></div>
+        <h2>Diplomado · FES Acatlán UNAM</h2>
+        <div class="separador"></div>
+        <ul class="lista" style="margin-bottom:1.25rem">
+            <li>Modalidad: <strong style="color:var(--text)">100% en línea</strong></li>
+            <li>Horario: <strong style="color:var(--text)">Viernes 18:00–21:30 · Sábado 09:00–13:30</strong></li>
+            <li>Duración: <strong style="color:var(--text)">240 horas</strong></li>
+        </ul>
+
+        <div class="precios">
+            <div class="precio-fila destacado">
+                <span class="precio-label">Comunidad UNAM</span>
+                <span class="precio-valor">$18,025 MXN</span>
+            </div>
+            <div class="precio-fila">
+                <span class="precio-label">Egresados del diplomado</span>
+                <span class="precio-valor">$20,500 MXN</span>
+            </div>
+            <div class="precio-fila">
+                <span class="precio-label">Público general</span>
+                <span class="precio-valor">$22,560 MXN</span>
+            </div>
+        </div>
+
+        <p style="margin-top:0.75rem; color:var(--muted); font-family:var(--fuente-mono); font-size:clamp(0.8rem,1.3vw,1rem)">
+            Más info: benjov.github.io/diplomado-cd-ia-acatlan
+            &nbsp;·&nbsp; benjov@ciencias.unam.mx
+        </p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 17 — CIERRE
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="diapositiva s-cierre" id="slide-17">
+        <div class="deco-grid"></div>
+        <p class="muted" style="font-family:var(--fuente-mono); font-size:clamp(0.8rem,1.3vw,1rem); margin-bottom:1rem">
+            Bloque 7 · Preguntas y cierre
+        </p>
+        <h1>¿Preguntas?</h1>
+        <div class="portada-linea" style="margin: 1.5rem auto;"></div>
+        <p class="muted" style="margin-bottom:2rem">Comparte tu URL en el chat mientras resolvemos dudas</p>
+        <div style="display:flex; flex-direction:column; gap:0.5rem; align-items:center">
+            <p style="font-family:var(--fuente-mono); font-size:clamp(0.85rem,1.4vw,1.05rem); color:var(--muted)">
+                benjov@ciencias.unam.mx
+            </p>
+            <p style="font-family:var(--fuente-mono); font-size:clamp(0.85rem,1.4vw,1.05rem); color:var(--muted)">
+                Guía paso a paso permanente → en el repositorio del workshop
+            </p>
+            <p style="font-family:var(--fuente-mono); font-size:clamp(0.85rem,1.4vw,1.05rem); color:var(--acento)">
+                benjov.github.io/diplomado-cd-ia-acatlan
+            </p>
+        </div>
+    </div>
+
+
+    <!-- ── Controles ──────────────────────────────────────────── -->
+    <div class="controles" id="controles">
+        <button class="btn-nav" id="btn-prev" onclick="anterior()" title="Anterior (←)">←</button>
+        <div class="progreso-barra">
+            <div class="progreso-fill" id="progreso-fill"></div>
+        </div>
+        <span class="contador" id="contador">1 / 17</span>
+        <button class="btn-nav" id="btn-next" onclick="siguiente()" title="Siguiente (→)">→</button>
+    </div>
+
+    <!-- ── Hint de teclado ────────────────────────────────────── -->
+    <div class="hint-teclado" id="hint-teclado">← → Espacio para navegar</div>
+
+</div><!-- /presentacion -->
+
+
+<script>
+    const slides    = document.querySelectorAll('.diapositiva');
+    const total     = slides.length;
+    let actual      = 0;
+
+    const elContador = document.getElementById('contador');
+    const elFill     = document.getElementById('progreso-fill');
+    const elPrev     = document.getElementById('btn-prev');
+    const elNext     = document.getElementById('btn-next');
+    const elHint     = document.getElementById('hint-teclado');
+
+    function ir(n) {
+        slides[actual].classList.remove('activa');
+        actual = Math.max(0, Math.min(n, total - 1));
+        slides[actual].classList.add('activa');
+        elContador.textContent = `${actual + 1} / ${total}`;
+        elFill.style.width = `${((actual + 1) / total) * 100}%`;
+        elPrev.disabled = actual === 0;
+        elNext.disabled = actual === total - 1;
+    }
+
+    function siguiente() { ir(actual + 1); }
+    function anterior()  { ir(actual - 1); }
+
+    /* Teclado */
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+            e.preventDefault(); siguiente();
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault(); anterior();
+        }
+    });
+
+    /* Clic en la diapositiva (no en controles) */
+    document.getElementById('presentacion').addEventListener('click', e => {
+        if (e.target.closest('#controles') || e.target.closest('#hint-teclado')) return;
+        siguiente();
+    });
+
+    /* Ocultar hint después de 4 segundos */
+    setTimeout(() => elHint.classList.add('oculto'), 4000);
+
+    /* Estado inicial */
+    ir(0);
+</script>
+
+</body>
+</html>

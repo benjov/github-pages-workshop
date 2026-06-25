@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniela Flores Méndez — Portafolio</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Este archivo usa exactamente el mismo CSS que la plantilla
+           (template/index.html) — lo que ves aquí es cómo se ve
+           cuando rellenas todos los campos. */
+
+        :root {
+            --fondo:          #ffffff;
+            --fondo-alt:      #f0f9ff;
+            --texto:          #0f172a;
+            --texto-suave:    #64748b;
+            --acento:         #0ea5e9;
+            --acento-hover:   #0284c7;
+            --borde:          #e2e8f0;
+            --tag-proyecto:   #dcfce7;
+            --tag-texto:      #15803d;
+            --tag-habilidad:  #e0f2fe;
+            --tag-hab-texto:  #0369a1;
+            --fuente: 'Inter', system-ui, -apple-system, sans-serif;
+            --radio: 10px;
+            --sombra: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--fuente); background: var(--fondo); color: var(--texto); line-height: 1.75; }
+        a { color: var(--acento); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        img { max-width: 100%; height: auto; }
+
+        .contenedor { max-width: 820px; margin: 0 auto; padding: 0 1.5rem; }
+
+        /* Navegación */
+        nav {
+            position: sticky; top: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--borde);
+            z-index: 100;
+        }
+        nav .contenedor { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 1rem; }
+        .nav-nombre { font-weight: 700; font-size: 1rem; color: var(--texto); white-space: nowrap; }
+        .nav-links { display: flex; gap: 1.5rem; list-style: none; flex-wrap: wrap; }
+        .nav-links a { color: var(--texto-suave); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--acento); text-decoration: none; }
+
+        /* Secciones */
+        section { padding: 4.5rem 0; }
+
+        .seccion-titulo {
+            font-size: 1.5rem; font-weight: 700;
+            margin-bottom: 1.75rem;
+            position: relative; padding-bottom: 0.75rem;
+        }
+        .seccion-titulo::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 40px; height: 3px; background: var(--acento); border-radius: 2px;
+        }
+
+        /* Botones */
+        .boton {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.6rem 1.35rem; border-radius: 999px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; text-decoration: none;
+        }
+        .boton-primario { background: var(--acento); color: #ffffff; }
+        .boton-primario:hover { background: var(--acento-hover); text-decoration: none; }
+        .boton-secundario { background: transparent; color: var(--texto); border: 1.5px solid var(--borde); }
+        .boton-secundario:hover { border-color: var(--acento); color: var(--acento); text-decoration: none; }
+
+        /* Hero */
+        #inicio { padding: 5rem 0 4rem; text-align: center; }
+
+        .avatar {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: var(--acento); display: flex; align-items: center;
+            justify-content: center; font-size: 3rem; font-weight: 700;
+            color: #ffffff; margin: 0 auto 1.5rem;
+            overflow: hidden; position: relative;
+        }
+        .avatar::before { content: attr(data-inicial); }
+        .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+        .hero-nombre { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 700; margin-bottom: 0.4rem; }
+        .hero-titulo { font-size: 1.1rem; color: var(--acento); font-weight: 600; margin-bottom: 0.8rem; }
+        .hero-bio { font-size: 1rem; color: var(--texto-suave); max-width: 480px; margin: 0 auto 2rem; }
+        .hero-botones { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+        /* Sobre mí */
+        #sobre-mi { background: var(--fondo-alt); }
+        #sobre-mi p { color: var(--texto-suave); margin-bottom: 1rem; }
+        #sobre-mi p:last-child { margin-bottom: 0; }
+
+        /* Proyectos */
+        .proyectos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+        .tarjeta-proyecto {
+            background: var(--fondo); border: 1.5px solid var(--borde);
+            border-radius: var(--radio); padding: 1.5rem; box-shadow: var(--sombra);
+            display: flex; flex-direction: column; gap: 0.75rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .tarjeta-proyecto:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.12); }
+        .proyecto-titulo { font-size: 1rem; font-weight: 700; }
+        .proyecto-descripcion { font-size: 0.9rem; color: var(--texto-suave); flex-grow: 1; }
+        .proyecto-tecnologias { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .tag-tecnologia {
+            background: var(--tag-proyecto); color: var(--tag-texto);
+            font-size: 0.75rem; font-weight: 600;
+            padding: 0.2rem 0.65rem; border-radius: 999px;
+        }
+        .proyecto-links {
+            display: flex; gap: 1rem; font-size: 0.85rem; font-weight: 600;
+            padding-top: 0.25rem; border-top: 1px solid var(--borde);
+        }
+
+        /* Habilidades */
+        #habilidades { background: var(--fondo-alt); }
+        .habilidades-lista { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+        .tag-habilidad {
+            background: var(--tag-habilidad); color: var(--tag-hab-texto);
+            font-size: 0.9rem; font-weight: 600;
+            padding: 0.4rem 1rem; border-radius: 999px;
+        }
+
+        /* Contacto */
+        #contacto { text-align: center; }
+        #contacto .seccion-titulo::after { left: 50%; transform: translateX(-50%); }
+        .contacto-descripcion { color: var(--texto-suave); max-width: 420px; margin: 0 auto 2rem; }
+        .contacto-links { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+        /* Footer */
+        footer {
+            background: #0f172a; color: #94a3b8;
+            text-align: center; padding: 1.5rem;
+            font-size: 0.85rem;
+        }
+        footer a { color: #38bdf8; }
+
+        /* Banner de demo */
+        .banner-demo {
+            background: #fef3c7; border-bottom: 1px solid #fcd34d;
+            text-align: center; padding: 0.6rem 1rem;
+            font-size: 0.85rem; color: #92400e;
+        }
+        .banner-demo strong { color: #78350f; }
+
+        @media (max-width: 520px) {
+            #inicio { padding: 3rem 0 2.5rem; }
+            .nav-links { gap: 0.9rem; font-size: 0.85rem; }
+            .proyectos-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Banner que el instructor puede mostrar u ocultar durante el workshop -->
+<div class="banner-demo">
+    <strong>Ejemplo de demostración</strong> — Así se ve la plantilla cuando la rellenas con tu información real.
+</div>
+
+
+<!-- ── Navegación ────────────────────────────────────────────────── -->
+<nav>
+    <div class="contenedor">
+        <span class="nav-nombre">Daniela Flores Méndez</span>
+        <ul class="nav-links">
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#sobre-mi">Sobre mí</a></li>
+            <li><a href="#proyectos">Proyectos</a></li>
+            <li><a href="#habilidades">Habilidades</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+        </ul>
+    </div>
+</nav>
+
+
+<!-- ── Hero ─────────────────────────────────────────────────────── -->
+<section id="inicio">
+    <div class="contenedor">
+
+        <div class="avatar" data-inicial="D"></div>
+
+        <h1 class="hero-nombre">Daniela Flores Méndez</h1>
+        <p class="hero-titulo">Socióloga de Datos · Análisis de texto y redes sociales</p>
+        <p class="hero-bio">
+            Investigo fenómenos sociales y políticos con Python, NLP y visualización de datos.
+            Egresada del Diplomado de Ciencia de Datos, FES Acatlán UNAM.
+        </p>
+
+        <div class="hero-botones">
+            <a href="mailto:dfloresmx@ejemplo.com" class="boton boton-primario">
+                ✉&nbsp; Escríbeme
+            </a>
+            <a href="https://github.com/daniela-flores-mx" target="_blank" rel="noopener" class="boton boton-secundario">
+                GitHub
+            </a>
+            <a href="https://linkedin.com/in/daniela-flores-mendez" target="_blank" rel="noopener" class="boton boton-secundario">
+                LinkedIn
+            </a>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ── Sobre mí ──────────────────────────────────────────────────── -->
+<section id="sobre-mi">
+    <div class="contenedor">
+        <h2 class="seccion-titulo">Sobre mí</h2>
+
+        <p>
+            Soy socióloga egresada de la FES Acatlán con una larga fascinación por entender
+            cómo la gente habla, debate y se organiza en internet. Después de años trabajando
+            con métodos cualitativos, descubrí que las mismas preguntas que me hacía en el
+            trabajo de campo podía responderlas a escala con código y datos.
+        </p>
+        <p>
+            En 2023 terminé el Diplomado de Ciencia de Datos en FES Acatlán, donde aprendí
+            Python, análisis estadístico, machine learning y procesamiento de lenguaje natural.
+            Hoy aplico esas herramientas en proyectos de investigación que cruzan las ciencias
+            sociales con la analítica de datos: análisis de discurso en redes, demografía
+            digital y minería de texto en corpus literarios.
+        </p>
+        <p>
+            Cuando no estoy codificando, facilito talleres de datos para investigadoras y
+            estudiantes de humanidades que quieren aprender a programar sin perder su perspectiva crítica.
+        </p>
+
+    </div>
+</section>
+
+
+<!-- ── Proyectos ─────────────────────────────────────────────────── -->
+<section id="proyectos">
+    <div class="contenedor">
+        <h2 class="seccion-titulo">Mis proyectos</h2>
+
+        <div class="proyectos-grid">
+
+            <!-- Proyecto 1: con link real al análisis -->
+            <article class="tarjeta-proyecto">
+                <h3 class="proyecto-titulo">Sentimiento en Twitter electoral 2024</h3>
+                <p class="proyecto-descripcion">
+                    Análisis de 52,000 tweets durante la campaña presidencial mexicana.
+                    Medí la polaridad del discurso por partido y su evolución semana a semana.
+                </p>
+                <div class="proyecto-tecnologias">
+                    <span class="tag-tecnologia">Python</span>
+                    <span class="tag-tecnologia">NLTK</span>
+                    <span class="tag-tecnologia">TextBlob</span>
+                    <span class="tag-tecnologia">Pandas</span>
+                    <span class="tag-tecnologia">Seaborn</span>
+                </div>
+                <div class="proyecto-links">
+                    <a href="proyectos/analisis-twitter/">Ver análisis →</a>
+                    <a href="https://github.com/daniela-flores-mx/twitter-electoral-2024" target="_blank" rel="noopener">Código</a>
+                </div>
+            </article>
+
+            <!-- Proyecto 2 -->
+            <article class="tarjeta-proyecto">
+                <h3 class="proyecto-titulo">Demografía digital: INEGI Censo 2020</h3>
+                <p class="proyecto-descripcion">
+                    Visualización interactiva de los datos del Censo 2020 a nivel municipal.
+                    Analicé patrones de acceso a internet y brecha digital por región.
+                </p>
+                <div class="proyecto-tecnologias">
+                    <span class="tag-tecnologia">Python</span>
+                    <span class="tag-tecnologia">GeoPandas</span>
+                    <span class="tag-tecnologia">Folium</span>
+                    <span class="tag-tecnologia">Seaborn</span>
+                </div>
+                <div class="proyecto-links">
+                    <a href="#">Ver mapa →</a>
+                    <a href="#">Código</a>
+                </div>
+            </article>
+
+            <!-- Proyecto 3 -->
+            <article class="tarjeta-proyecto">
+                <h3 class="proyecto-titulo">Voces del canon: literatura mexicana s. XX</h3>
+                <p class="proyecto-descripcion">
+                    Minería de texto en 80 novelas mexicanas del siglo XX. Identifiqué
+                    redes de personajes y campos semánticos dominantes por década.
+                </p>
+                <div class="proyecto-tecnologias">
+                    <span class="tag-tecnologia">Python</span>
+                    <span class="tag-tecnologia">NLTK</span>
+                    <span class="tag-tecnologia">NetworkX</span>
+                    <span class="tag-tecnologia">spaCy</span>
+                </div>
+                <div class="proyecto-links">
+                    <a href="#">Ver análisis →</a>
+                    <a href="#">Código</a>
+                </div>
+            </article>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ── Habilidades ───────────────────────────────────────────────── -->
+<section id="habilidades">
+    <div class="contenedor">
+        <h2 class="seccion-titulo">Habilidades</h2>
+
+        <div class="habilidades-lista">
+            <span class="tag-habilidad">Python</span>
+            <span class="tag-habilidad">Pandas</span>
+            <span class="tag-habilidad">NumPy</span>
+            <span class="tag-habilidad">Matplotlib</span>
+            <span class="tag-habilidad">Seaborn</span>
+            <span class="tag-habilidad">NLTK</span>
+            <span class="tag-habilidad">TextBlob</span>
+            <span class="tag-habilidad">spaCy</span>
+            <span class="tag-habilidad">Scikit-learn</span>
+            <span class="tag-habilidad">GeoPandas</span>
+            <span class="tag-habilidad">SQL</span>
+            <span class="tag-habilidad">Git &amp; GitHub</span>
+            <span class="tag-habilidad">Jupyter Notebooks</span>
+            <span class="tag-habilidad">R (básico)</span>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ── Contacto ──────────────────────────────────────────────────── -->
+<section id="contacto">
+    <div class="contenedor">
+        <h2 class="seccion-titulo">Contacto</h2>
+
+        <p class="contacto-descripcion">
+            ¿Tienes un proyecto de investigación con datos o quieres colaborar?
+            Estoy abierta a nuevas ideas, especialmente en ciencias sociales y humanidades.
+        </p>
+
+        <div class="contacto-links">
+            <a href="mailto:dfloresmx@ejemplo.com" class="boton boton-primario">
+                ✉&nbsp; dfloresmx@ejemplo.com
+            </a>
+            <a href="https://github.com/daniela-flores-mx" target="_blank" rel="noopener" class="boton boton-secundario">
+                GitHub
+            </a>
+            <a href="https://linkedin.com/in/daniela-flores-mendez" target="_blank" rel="noopener" class="boton boton-secundario">
+                LinkedIn
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- ── Footer ───────────────────────────────────────────────────── -->
+<footer>
+    <p>
+        &copy; 2024 Daniela Flores Méndez
+        &mdash; Hecho con <a href="https://pages.github.com/" target="_blank" rel="noopener">GitHub Pages</a>
+    </p>
+</footer>
+
+</body>
+</html>

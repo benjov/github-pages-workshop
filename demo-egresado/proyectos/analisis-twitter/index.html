@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de sentimiento en Twitter electoral 2024 — Daniela Flores Méndez</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --fondo:      #ffffff;
+            --fondo-alt:  #f8fafc;
+            --texto:      #0f172a;
+            --suave:      #64748b;
+            --acento:     #0ea5e9;
+            --borde:      #e2e8f0;
+            --verde:      #16a34a;
+            --verde-bg:   #dcfce7;
+            --fuente:     'Inter', system-ui, sans-serif;
+            --mono:       'JetBrains Mono', 'Fira Code', monospace;
+            --radio:      8px;
+            --sombra:     0 1px 8px rgba(0,0,0,0.07);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--fuente); background: var(--fondo); color: var(--texto); line-height: 1.8; }
+        a { color: var(--acento); }
+        a:hover { text-decoration: none; }
+
+        /* ── Contenedor ── */
+        .contenedor { max-width: 780px; margin: 0 auto; padding: 0 1.5rem; }
+
+        /* ── Nav breadcrumb ── */
+        nav {
+            position: sticky; top: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--borde);
+            z-index: 100;
+        }
+        nav .contenedor {
+            height: 52px; display: flex; align-items: center;
+            gap: 0.5rem; font-size: 0.875rem; color: var(--suave);
+        }
+        nav a { color: var(--acento); font-weight: 500; text-decoration: none; }
+        nav a:hover { text-decoration: underline; }
+        nav .sep { color: var(--borde); }
+
+        /* ── Header del proyecto ── */
+        .proyecto-header {
+            padding: 3.5rem 0 2.5rem;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .proyecto-tags {
+            display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: var(--fondo-alt); border: 1px solid var(--borde);
+            color: var(--suave); font-size: 0.78rem; font-weight: 600;
+            padding: 0.2rem 0.7rem; border-radius: 999px;
+            font-family: var(--mono);
+        }
+
+        .tag.verde { background: var(--verde-bg); border-color: #bbf7d0; color: var(--verde); }
+
+        .proyecto-titulo {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 700; line-height: 1.3;
+            margin-bottom: 0.75rem;
+        }
+
+        .proyecto-resumen {
+            font-size: 1.05rem; color: var(--suave);
+            max-width: 620px; margin-bottom: 1.5rem;
+        }
+
+        .proyecto-meta {
+            display: flex; gap: 1.5rem; flex-wrap: wrap;
+            font-size: 0.875rem; color: var(--suave);
+        }
+
+        .proyecto-meta span { display: flex; align-items: center; gap: 0.35rem; }
+
+        /* ── Secciones del notebook ── */
+        .seccion {
+            padding: 2.5rem 0;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .seccion:last-child { border-bottom: none; }
+
+        .seccion-num {
+            font-family: var(--mono);
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--acento);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+        }
+
+        .seccion h2 {
+            font-size: 1.3rem; font-weight: 700;
+            margin-bottom: 1.25rem;
+        }
+
+        .seccion p { color: var(--suave); margin-bottom: 1rem; }
+        .seccion p:last-child { margin-bottom: 0; }
+        .seccion strong { color: var(--texto); }
+
+        /* ── Celdas de código estilo Jupyter ── */
+        .celda { margin: 1.5rem 0; }
+
+        .celda-input {
+            display: grid;
+            grid-template-columns: 70px 1fr;
+        }
+
+        .celda-marcador {
+            padding: 0.75rem 0.5rem 0;
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: #6b7280;
+            text-align: right;
+            user-select: none;
+        }
+
+        .celda-codigo {
+            background: #1a1a2e;
+            border-radius: 0 var(--radio) var(--radio) 0;
+            border-left: 3px solid var(--acento);
+            overflow-x: auto;
+        }
+
+        pre {
+            padding: 1rem 1.25rem;
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: #d4d4d4;
+        }
+
+        /* Syntax highlighting */
+        .kw  { color: #569cd6; }   /* keywords */
+        .fn  { color: #dcdcaa; }   /* functions */
+        .st  { color: #ce9178; }   /* strings */
+        .cm  { color: #6a9955; }   /* comments */
+        .nb  { color: #9cdcfe; }   /* builtins/variables */
+        .nm  { color: #b5cea8; }   /* numbers */
+        .op  { color: #d4d4d4; }   /* operators */
+
+        .celda-output {
+            display: grid;
+            grid-template-columns: 70px 1fr;
+        }
+
+        .celda-output-marcador {
+            padding: 0.75rem 0.5rem 0;
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: #dc2626;
+            text-align: right;
+            user-select: none;
+        }
+
+        .celda-output-contenido {
+            background: var(--fondo-alt);
+            border-radius: 0 var(--radio) var(--radio) 0;
+            border-left: 3px solid var(--borde);
+            padding: 0.75rem 1.25rem;
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            color: var(--texto);
+            line-height: 1.6;
+        }
+
+        /* ── Gráficas ── */
+        .grafica-contenedor {
+            margin: 1.5rem 0;
+            background: var(--fondo-alt);
+            border: 1px solid var(--borde);
+            border-radius: var(--radio);
+            overflow: hidden;
+            box-shadow: var(--sombra);
+        }
+
+        .grafica-titulo {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.85rem; font-weight: 600;
+            color: var(--suave);
+            border-bottom: 1px solid var(--borde);
+            background: white;
+            font-family: var(--mono);
+        }
+
+        .grafica-contenedor svg {
+            display: block;
+            width: 100%;
+        }
+
+        /* ── Tabla de datos ── */
+        .tabla-wrapper { overflow-x: auto; margin: 1rem 0; }
+
+        table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.875rem; font-family: var(--mono);
+        }
+
+        th {
+            background: var(--fondo-alt); padding: 0.5rem 0.75rem;
+            text-align: left; font-weight: 600; font-size: 0.8rem;
+            color: var(--suave); border-bottom: 2px solid var(--borde);
+        }
+
+        td {
+            padding: 0.45rem 0.75rem; border-bottom: 1px solid var(--borde);
+            color: var(--texto);
+        }
+
+        tr:hover td { background: var(--fondo-alt); }
+
+        /* ── Callout / nota ── */
+        .nota {
+            background: #e0f2fe; border-left: 4px solid var(--acento);
+            border-radius: 0 var(--radio) var(--radio) 0;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0;
+            font-size: 0.95rem;
+            color: #0f172a;
+        }
+
+        .nota strong { color: #0369a1; }
+
+        /* ── Footer ── */
+        footer {
+            background: #0f172a; color: #94a3b8;
+            text-align: center; padding: 2rem;
+            font-size: 0.875rem; line-height: 2;
+        }
+        footer a { color: #38bdf8; }
+
+        @media (max-width: 520px) {
+            .celda-marcador, .celda-output-marcador { display: none; }
+            .celda-input, .celda-output { grid-template-columns: 1fr; }
+            .proyecto-meta { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ── Nav breadcrumb ───────────────────────────────────────────── -->
+<nav>
+    <div class="contenedor">
+        <a href="../../">Daniela Flores Méndez</a>
+        <span class="sep">/</span>
+        <a href="../../#proyectos">Proyectos</a>
+        <span class="sep">/</span>
+        <span>Sentimiento electoral 2024</span>
+    </div>
+</nav>
+
+
+<!-- ── Header del proyecto ──────────────────────────────────────── -->
+<header class="proyecto-header">
+    <div class="contenedor">
+        <div class="proyecto-tags">
+            <span class="tag">Python</span>
+            <span class="tag">NLP</span>
+            <span class="tag">Twitter</span>
+            <span class="tag">Ciencias sociales</span>
+            <span class="tag verde">Análisis completo</span>
+        </div>
+
+        <h1 class="proyecto-titulo">
+            Análisis de sentimiento en Twitter<br>durante el proceso electoral 2024 en México
+        </h1>
+
+        <p class="proyecto-resumen">
+            ¿Cómo varió el sentimiento en Twitter hacia los principales partidos políticos
+            durante la campaña presidencial de 2024? Analicé 52,847 tweets con Python y
+            NLP para responder esa pregunta semana a semana.
+        </p>
+
+        <div class="proyecto-meta">
+            <span>📅 Junio 2024</span>
+            <span>👤 Daniela Flores Méndez</span>
+            <span>🐦 52,847 tweets</span>
+            <span>⏱ ~15 min de lectura</span>
+        </div>
+    </div>
+</header>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 1 — INTRODUCCIÓN
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="seccion">
+    <div class="contenedor">
+        <div class="seccion-num">SECCIÓN 01</div>
+        <h2>Introducción</h2>
+
+        <p>
+            Twitter (hoy X) se ha convertido en uno de los espacios principales de debate político
+            en México. Durante los procesos electorales, millones de usuarios expresan opiniones,
+            comparten noticias y debaten propuestas en tiempo real. Este flujo de texto constituye
+            una fuente valiosa para investigar el clima político y la percepción pública de los partidos.
+        </p>
+        <p>
+            En este análisis me propuse responder tres preguntas:
+        </p>
+        <p>
+            <strong>1.</strong> ¿Qué partido genera más sentimiento positivo en Twitter durante la campaña 2024?<br>
+            <strong>2.</strong> ¿Cómo evoluciona el sentimiento semana a semana conforme avanza la campaña?<br>
+            <strong>3.</strong> ¿Cuáles son los temas y palabras más frecuentes en el discurso político de cada partido?
+        </p>
+
+        <div class="nota">
+            <strong>Nota metodológica:</strong> Este análisis usa <strong>TextBlob</strong> para análisis de sentimiento.
+            TextBlob fue diseñado para inglés, por lo que los tweets fueron traducidos al inglés antes
+            del análisis. Una mejora futura sería usar modelos entrenados en español, como
+            BERT en español o BETO.
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 2 — DATOS
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="seccion">
+    <div class="contenedor">
+        <div class="seccion-num">SECCIÓN 02</div>
+        <h2>Datos</h2>
+
+        <p>
+            Recolecté tweets usando la API académica de Twitter con palabras clave asociadas a cada partido.
+            El período de recolección abarca del 1 de febrero al 2 de junio de 2024 (día de la elección).
+        </p>
+
+        <!-- Celda 1: imports -->
+        <div class="celda">
+            <div class="celda-input">
+                <div class="celda-marcador">In [1]:</div>
+                <div class="celda-codigo">
+                    <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> <span class="nb">pd</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> <span class="nb">np</span>
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> <span class="nb">plt</span>
+<span class="kw">import</span> seaborn <span class="kw">as</span> <span class="nb">sns</span>
+<span class="kw">from</span> textblob <span class="kw">import</span> TextBlob
+<span class="kw">import</span> re
+<span class="kw">import</span> warnings
+warnings.<span class="fn">filterwarnings</span>(<span class="st">'ignore'</span>)
+
+<span class="fn">print</span>(<span class="st">"Librerías cargadas correctamente ✓"</span>)</code></pre>
+                </div>
+            </div>
+            <div class="celda-output">
+                <div class="celda-output-marcador">Out [1]:</div>
+                <div class="celda-output-contenido">Librerías cargadas correctamente ✓</div>
+            </div>
+        </div>
+
+        <!-- Celda 2: cargar datos -->
+        <div class="celda">
+            <div class="celda-input">
+                <div class="celda-marcador">In [2]:</div>
+                <div class="celda-codigo">
+                    <pre><code><span class="cm"># Cargamos el dataset de tweets recolectados</span>
+df = pd.<span class="fn">read_csv</span>(<span class="st">'tweets_elecciones_2024.csv'</span>,
+                 parse_dates=[<span class="st">'fecha'</span>])
+
+<span class="fn">print</span>(<span class="nb">f</span><span class="st">"Total de tweets: </span><span class="nb">{len(df):,}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="nb">f</span><span class="st">"Período: </span><span class="nb">{df['fecha'].min().date()}</span><span class="st"> — </span><span class="nb">{df['fecha'].max().date()}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="nb">f</span><span class="st">"Columnas: </span><span class="nb">{list(df.columns)}</span><span class="st">"</span>)
+df.<span class="fn">head</span>(<span class="nm">3</span>)</code></pre>
+                </div>
+            </div>
+            <div class="celda-output">
+                <div class="celda-output-marcador">Out [2]:</div>
+                <div class="celda-output-contenido">Total de tweets: 52,847
+Período: 2024-02-01 — 2024-06-02
+Columnas: ['id', 'fecha', 'usuario', 'texto', 'partido', 'semana', 'retweets', 'likes']</div>
+            </div>
+        </div>
+
+        <!-- Tabla muestra -->
+        <div class="tabla-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>fecha</th>
+                        <th>texto (extracto)</th>
+                        <th>partido</th>
+                        <th>retweets</th>
+                        <th>likes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>2024-02-05</td><td>"El pueblo manda y la Cuarta Transforma..."</td><td>Morena</td><td>1,204</td><td>3,871</td></tr>
+                    <tr><td>2024-02-07</td><td>"México necesita un cambio real, no más..."</td><td>PAN</td><td>542</td><td>1,203</td></tr>
+                    <tr><td>2024-02-09</td><td>"Corrupción y promesas incumplidas, eso..."</td><td>PRI</td><td>88</td><td>241</td></tr>
+                    <tr><td>2024-02-11</td><td>"Un gobierno para todos, con propuestas..."</td><td>MC</td><td>317</td><td>908</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 3 — METODOLOGÍA
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="seccion">
+    <div class="contenedor">
+        <div class="seccion-num">SECCIÓN 03</div>
+        <h2>Metodología</h2>
+
+        <p>
+            El análisis se realizó en tres pasos: limpieza del texto, traducción al inglés,
+            y clasificación del sentimiento con TextBlob.
+        </p>
+
+        <!-- Celda 3: limpieza -->
+        <div class="celda">
+            <div class="celda-input">
+                <div class="celda-marcador">In [3]:</div>
+                <div class="celda-codigo">
+                    <pre><code><span class="kw">def</span> <span class="fn">limpiar_texto</span>(texto):
+    <span class="cm"># Eliminar URLs</span>
+    texto = re.<span class="fn">sub</span>(<span class="st">r'http\S+'</span>, <span class="st">''</span>, texto)
+    <span class="cm"># Eliminar menciones (@usuario) y hashtags</span>
+    texto = re.<span class="fn">sub</span>(<span class="st">r'[@#]\S+'</span>, <span class="st">''</span>, texto)
+    <span class="cm"># Eliminar caracteres especiales y emojis</span>
+    texto = re.<span class="fn">sub</span>(<span class="st">r'[^\w\sáéíóúüñÁÉÍÓÚÜÑ]'</span>, <span class="st">''</span>, texto)
+    <span class="kw">return</span> texto.<span class="fn">strip</span>().<span class="fn">lower</span>()
+
+df[<span class="st">'texto_limpio'</span>] = df[<span class="st">'texto'</span>].<span class="fn">apply</span>(limpiar_texto)
+<span class="fn">print</span>(<span class="nb">f</span><span class="st">"Tweets procesados: </span><span class="nb">{len(df):,}</span><span class="st">"</span>)</code></pre>
+                </div>
+            </div>
+            <div class="celda-output">
+                <div class="celda-output-marcador">Out [3]:</div>
+                <div class="celda-output-contenido">Tweets procesados: 52,847</div>
+            </div>
+        </div>
+
+        <!-- Celda 4: sentimiento -->
+        <div class="celda">
+            <div class="celda-input">
+                <div class="celda-marcador">In [4]:</div>
+                <div class="celda-codigo">
+                    <pre><code><span class="kw">def</span> <span class="fn">obtener_sentimiento</span>(texto):
+    <span class="st">"""Retorna polaridad: -1.0 (muy negativo) a +1.0 (muy positivo)"""</span>
+    <span class="kw">return</span> TextBlob(texto).sentiment.polarity
+
+<span class="kw">def</span> <span class="fn">clasificar</span>(score):
+    <span class="kw">if</span> score > <span class="nm">0.05</span>:  <span class="kw">return</span> <span class="st">'positivo'</span>
+    <span class="kw">if</span> score < <span class="nm">-0.05</span>: <span class="kw">return</span> <span class="st">'negativo'</span>
+    <span class="kw">return</span> <span class="st">'neutral'</span>
+
+df[<span class="st">'score'</span>]     = df[<span class="st">'texto_limpio'</span>].<span class="fn">apply</span>(obtener_sentimiento)
+df[<span class="st">'categoria'</span>] = df[<span class="st">'score'</span>].<span class="fn">apply</span>(clasificar)
+
+<span class="fn">print</span>(df[<span class="st">'categoria'</span>].<span class="fn">value_counts</span>(normalize=<span class="kw">True</span>).<span class="fn">round</span>(<span class="nm">3</span>) * <span class="nm">100</span>)</code></pre>
+                </div>
+            </div>
+            <div class="celda-output">
+                <div class="celda-output-marcador">Out [4]:</div>
+                <div class="celda-output-contenido">negativo    42.1
+positivo    37.4
+neutral     20.5
+Name: categoria, dtype: float64</div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 4 — RESULTADOS
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="seccion">
+    <div class="contenedor">
+        <div class="seccion-num">SECCIÓN 04</div>
+        <h2>Resultados</h2>
+
+        <!-- ── Gráfica 1: Distribución de sentimiento por partido ── -->
+        <p><strong>4.1 Distribución de sentimiento por partido</strong></p>
+        <p>
+            Morena y MC concentran el mayor porcentaje de tweets positivos,
+            mientras que PRI acumula la mayor proporción de sentimiento negativo.
+        </p>
+
+        <div class="grafica-contenedor">
+            <div class="grafica-titulo">Figura 1 — Distribución de sentimiento por partido político (%)</div>
+            <svg viewBox="0 0 600 250" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+                <rect width="600" height="250" fill="#f8fafc"/>
+
+                <!-- Encabezados de columna -->
+                <text x="90" y="22" font-size="10" fill="#94a3b8" font-weight="600">PARTIDO</text>
+                <text x="400" y="22" text-anchor="middle" font-size="10" fill="#94a3b8">0%</text>
+                <text x="580" y="22" font-size="10" fill="#94a3b8" text-anchor="end">100%</text>
+                <line x1="90" y1="27" x2="590" y2="27" stroke="#e2e8f0" stroke-width="1"/>
+
+                <!-- MORENA (45 / 35 / 20) -->
+                <text x="85" y="58" text-anchor="end" font-size="11" font-weight="700" fill="#7c1a2e">Morena</text>
+                <!-- positivo -->
+                <rect x="90" y="42" width="221" height="26" fill="#4ade80" rx="3"/>
+                <text x="200" y="59" text-anchor="middle" font-size="10" font-weight="700" fill="#052e16">45%</text>
+                <!-- negativo -->
+                <rect x="311" y="42" width="172" height="26" fill="#f87171" rx="3"/>
+                <text x="397" y="59" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">35%</text>
+                <!-- neutral -->
+                <rect x="483" y="42" width="97" height="26" fill="#cbd5e1" rx="3"/>
+                <text x="531" y="59" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">20%</text>
+
+                <!-- PAN (38 / 42 / 20) -->
+                <text x="85" y="108" text-anchor="end" font-size="11" font-weight="700" fill="#1d4ed8">PAN</text>
+                <rect x="90" y="92" width="186" height="26" fill="#4ade80" rx="3"/>
+                <text x="183" y="109" text-anchor="middle" font-size="10" font-weight="700" fill="#052e16">38%</text>
+                <rect x="276" y="92" width="206" height="26" fill="#f87171" rx="3"/>
+                <text x="379" y="109" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">42%</text>
+                <rect x="482" y="92" width="98" height="26" fill="#cbd5e1" rx="3"/>
+                <text x="531" y="109" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">20%</text>
+
+                <!-- PRI (22 / 58 / 20) -->
+                <text x="85" y="158" text-anchor="end" font-size="11" font-weight="700" fill="#dc2626">PRI</text>
+                <rect x="90" y="142" width="108" height="26" fill="#4ade80" rx="3"/>
+                <text x="144" y="159" text-anchor="middle" font-size="10" font-weight="700" fill="#052e16">22%</text>
+                <rect x="198" y="142" width="284" height="26" fill="#f87171" rx="3"/>
+                <text x="340" y="159" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">58%</text>
+                <rect x="482" y="142" width="98" height="26" fill="#cbd5e1" rx="3"/>
+                <text x="531" y="159" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">20%</text>
+
+                <!-- MC (42 / 33 / 25) -->
+                <text x="85" y="208" text-anchor="end" font-size="11" font-weight="700" fill="#ea580c">MC</text>
+                <rect x="90" y="192" width="206" height="26" fill="#4ade80" rx="3"/>
+                <text x="193" y="209" text-anchor="middle" font-size="10" font-weight="700" fill="#052e16">42%</text>
+                <rect x="296" y="192" width="162" height="26" fill="#f87171" rx="3"/>
+                <text x="377" y="209" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">33%</text>
+                <rect x="458" y="192" width="122" height="26" fill="#cbd5e1" rx="3"/>
+                <text x="519" y="209" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">25%</text>
+
+                <!-- Leyenda -->
+                <rect x="145" y="230" width="12" height="10" fill="#4ade80" rx="2"/>
+                <text x="161" y="239" font-size="10" fill="#64748b">Positivo</text>
+                <rect x="230" y="230" width="12" height="10" fill="#f87171" rx="2"/>
+                <text x="246" y="239" font-size="10" fill="#64748b">Negativo</text>
+                <rect x="315" y="230" width="12" height="10" fill="#cbd5e1" rx="2"/>
+                <text x="331" y="239" font-size="10" fill="#64748b">Neutral</text>
+            </svg>
+        </div>
+
+        <!-- ── Gráfica 2: Evolución temporal ── -->
+        <p style="margin-top:2rem"><strong>4.2 Evolución del sentimiento a lo largo de la campaña</strong></p>
+        <p>
+            El sentimiento hacia Morena se mantuvo positivo durante la mayor parte de la campaña,
+            con un pico durante las semanas 7-9. El sentimiento hacia la coalición PAN-PRI mostró
+            una tendencia decreciente, especialmente en las semanas finales.
+        </p>
+
+        <div class="grafica-contenedor">
+            <div class="grafica-titulo">Figura 2 — Score de sentimiento promedio por semana (-1 = negativo · +1 = positivo)</div>
+            <svg viewBox="0 0 600 230" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+                <rect width="600" height="230" fill="#f8fafc"/>
+
+                <!-- Eje Y (líneas de cuadrícula) -->
+                <!-- y=0.4 → 20px, y=0.2 → 57.5px, y=0 → 95px, y=-0.2 → 132.5px, y=-0.4 → 170px -->
+                <line x1="55" y1="20"  x2="590" y2="20"  stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+                <line x1="55" y1="57"  x2="590" y2="57"  stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+                <line x1="55" y1="95"  x2="590" y2="95"  stroke="#94a3b8" stroke-width="1"/>
+                <line x1="55" y1="133" x2="590" y2="133" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+                <line x1="55" y1="170" x2="590" y2="170" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+
+                <!-- Etiquetas eje Y -->
+                <text x="50" y="24"  text-anchor="end" font-size="10" fill="#94a3b8">+0.4</text>
+                <text x="50" y="61"  text-anchor="end" font-size="10" fill="#94a3b8">+0.2</text>
+                <text x="50" y="99"  text-anchor="end" font-size="10" fill="#64748b" font-weight="600">0.0</text>
+                <text x="50" y="137" text-anchor="end" font-size="10" fill="#94a3b8">-0.2</text>
+                <text x="50" y="174" text-anchor="end" font-size="10" fill="#94a3b8">-0.4</text>
+
+                <!-- Etiquetas eje X (semanas) -->
+                <text x="60"  y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S1</text>
+                <text x="108" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S2</text>
+                <text x="156" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S3</text>
+                <text x="204" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S4</text>
+                <text x="252" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S5</text>
+                <text x="300" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S6</text>
+                <text x="348" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S7</text>
+                <text x="396" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S8</text>
+                <text x="444" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S9</text>
+                <text x="492" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S10</text>
+                <text x="540" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S11</text>
+                <text x="588" y="190" font-size="9" fill="#94a3b8" text-anchor="middle">S12</text>
+                <text x="320" y="205" text-anchor="middle" font-size="10" fill="#94a3b8">Semanas de campaña (Feb–Jun 2024)</text>
+
+                <!-- Línea Morena (score: 0.15,0.18,0.20,0.22,0.10,0.08,0.25,0.30,0.28,0.15,0.12,0.05) -->
+                <!-- y = 95 - score*187.5 -->
+                <polyline
+                    points="60,67 108,61 156,58 204,54 252,76 300,80 348,48 396,39 444,42 492,67 540,73 588,86"
+                    fill="none" stroke="#7c1a2e" stroke-width="2.5" stroke-linejoin="round"/>
+                <!-- Puntos Morena -->
+                <circle cx="60"  cy="67" r="4" fill="#7c1a2e"/>
+                <circle cx="108" cy="61" r="4" fill="#7c1a2e"/>
+                <circle cx="156" cy="58" r="4" fill="#7c1a2e"/>
+                <circle cx="204" cy="54" r="4" fill="#7c1a2e"/>
+                <circle cx="252" cy="76" r="4" fill="#7c1a2e"/>
+                <circle cx="300" cy="80" r="4" fill="#7c1a2e"/>
+                <circle cx="348" cy="48" r="4" fill="#7c1a2e"/>
+                <circle cx="396" cy="39" r="4" fill="#7c1a2e"/>
+                <circle cx="444" cy="42" r="4" fill="#7c1a2e"/>
+                <circle cx="492" cy="67" r="4" fill="#7c1a2e"/>
+                <circle cx="540" cy="73" r="4" fill="#7c1a2e"/>
+                <circle cx="588" cy="86" r="4" fill="#7c1a2e"/>
+
+                <!-- Línea Coalición PAN-PRI (score: -0.05,-0.03,-0.08,-0.10,-0.15,-0.12,-0.08,-0.18,-0.22,-0.25,-0.20,-0.30) -->
+                <polyline
+                    points="60,104 108,101 156,110 204,114 252,123 300,118 348,110 396,129 444,136 492,142 540,133 588,151"
+                    fill="none" stroke="#1d4ed8" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="6,3"/>
+                <!-- Puntos Coalición -->
+                <circle cx="60"  cy="104" r="4" fill="#1d4ed8"/>
+                <circle cx="108" cy="101" r="4" fill="#1d4ed8"/>
+                <circle cx="156" cy="110" r="4" fill="#1d4ed8"/>
+                <circle cx="204" cy="114" r="4" fill="#1d4ed8"/>
+                <circle cx="252" cy="123" r="4" fill="#1d4ed8"/>
+                <circle cx="300" cy="118" r="4" fill="#1d4ed8"/>
+                <circle cx="348" cy="110" r="4" fill="#1d4ed8"/>
+                <circle cx="396" cy="129" r="4" fill="#1d4ed8"/>
+                <circle cx="444" cy="136" r="4" fill="#1d4ed8"/>
+                <circle cx="492" cy="142" r="4" fill="#1d4ed8"/>
+                <circle cx="540" cy="133" r="4" fill="#1d4ed8"/>
+                <circle cx="588" cy="151" r="4" fill="#1d4ed8"/>
+
+                <!-- Leyenda -->
+                <line x1="120" y1="215" x2="150" y2="215" stroke="#7c1a2e" stroke-width="2.5"/>
+                <circle cx="135" cy="215" r="4" fill="#7c1a2e"/>
+                <text x="155" y="219" font-size="10" fill="#64748b">Morena</text>
+                <line x1="240" y1="215" x2="270" y2="215" stroke="#1d4ed8" stroke-width="2.5" stroke-dasharray="5,3"/>
+                <circle cx="255" cy="215" r="4" fill="#1d4ed8"/>
+                <text x="275" y="219" font-size="10" fill="#64748b">Coalición PAN-PRI</text>
+
+                <!-- Anotación: primer debate -->
+                <line x1="252" y1="25" x2="252" y2="170" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,3"/>
+                <text x="258" y="32" font-size="9" fill="#d97706">Primer debate</text>
+            </svg>
+        </div>
+
+        <!-- ── Gráfica 3: Palabras frecuentes ── -->
+        <p style="margin-top:2rem"><strong>4.3 Palabras más frecuentes (excluidas stopwords)</strong></p>
+        <p>
+            Después de remover palabras vacías (<em>stopwords</em>), las palabras más frecuentes
+            en el corpus revelan los temas centrales del debate electoral.
+        </p>
+
+        <div class="grafica-contenedor">
+            <div class="grafica-titulo">Figura 3 — Top 10 palabras más frecuentes en todos los partidos</div>
+            <svg viewBox="0 0 600 295" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+                <rect width="600" height="295" fill="#f8fafc"/>
+
+                <!-- Datos: max=8420 → barra=440px ancho (90 a 580) -->
+                <!-- elecciones: 440px -->
+                <!-- México: 400px (7650/8420 * 440 = 399.8) -->
+                <!-- votación: 360px (6890/8420 * 440 = 360.0) -->
+                <!-- candidato: 320px (6120/8420 * 440 = 319.9) -->
+                <!-- pueblo: 305px (5840/8420 * 440 = 305.2) -->
+                <!-- gobierno: 272px (5210/8420 * 440 = 272.4) -->
+                <!-- corrupción: 260px (4980/8420 * 440 = 260.2) -->
+                <!-- cambio: 243px (4650/8420 * 440 = 243.0) -->
+                <!-- democracia: 221px (4230/8420 * 440 = 220.9) -->
+                <!-- presidenta: 208px (3980/8420 * 440 = 208.0) -->
+
+                <!-- Barras -->
+                <rect x="140" y="18"  width="440" height="20" fill="#0ea5e9" rx="3" opacity="0.9"/>
+                <rect x="140" y="48"  width="400" height="20" fill="#0ea5e9" rx="3" opacity="0.85"/>
+                <rect x="140" y="78"  width="360" height="20" fill="#0ea5e9" rx="3" opacity="0.80"/>
+                <rect x="140" y="108" width="320" height="20" fill="#0ea5e9" rx="3" opacity="0.75"/>
+                <rect x="140" y="138" width="305" height="20" fill="#0ea5e9" rx="3" opacity="0.70"/>
+                <rect x="140" y="168" width="272" height="20" fill="#0ea5e9" rx="3" opacity="0.65"/>
+                <rect x="140" y="198" width="260" height="20" fill="#0ea5e9" rx="3" opacity="0.60"/>
+                <rect x="140" y="228" width="243" height="20" fill="#0ea5e9" rx="3" opacity="0.55"/>
+                <rect x="140" y="258" width="221" height="20" fill="#0ea5e9" rx="3" opacity="0.50"/>
+
+                <!-- Etiquetas de palabras -->
+                <text x="135" y="32"  text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">elecciones</text>
+                <text x="135" y="62"  text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">México</text>
+                <text x="135" y="92"  text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">votación</text>
+                <text x="135" y="122" text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">candidato</text>
+                <text x="135" y="152" text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">pueblo</text>
+                <text x="135" y="182" text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">gobierno</text>
+                <text x="135" y="212" text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">corrupción</text>
+                <text x="135" y="242" text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">cambio</text>
+                <text x="135" y="272" text-anchor="end" font-size="11" fill="#0f172a" font-weight="600">democracia</text>
+
+                <!-- Conteos -->
+                <text x="585" y="32"  font-size="10" fill="#64748b" font-family="monospace">8,420</text>
+                <text x="545" y="62"  font-size="10" fill="#64748b" font-family="monospace">7,650</text>
+                <text x="505" y="92"  font-size="10" fill="#64748b" font-family="monospace">6,890</text>
+                <text x="465" y="122" font-size="10" fill="#64748b" font-family="monospace">6,120</text>
+                <text x="450" y="152" font-size="10" fill="#64748b" font-family="monospace">5,840</text>
+                <text x="417" y="182" font-size="10" fill="#64748b" font-family="monospace">5,210</text>
+                <text x="405" y="212" font-size="10" fill="#64748b" font-family="monospace">4,980</text>
+                <text x="388" y="242" font-size="10" fill="#64748b" font-family="monospace">4,650</text>
+                <text x="366" y="272" font-size="10" fill="#64748b" font-family="monospace">4,230</text>
+            </svg>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECCIÓN 5 — CONCLUSIONES
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="seccion">
+    <div class="contenedor">
+        <div class="seccion-num">SECCIÓN 05</div>
+        <h2>Conclusiones</h2>
+
+        <p>
+            El análisis muestra patrones claros en la forma en que los usuarios de Twitter se
+            expresaron sobre los partidos durante la campaña 2024:
+        </p>
+        <p>
+            <strong>1. Morena y MC lideran en sentimiento positivo.</strong> Ambos partidos
+            recibieron más del 40% de tweets con polaridad positiva, sugiriendo que sus
+            mensajes de campaña resonaron favorablemente en la conversación digital.
+        </p>
+        <p>
+            <strong>2. El PRI concentra el mayor rechazo.</strong> Con un 58% de sentimiento
+            negativo, el PRI fue el partido con peor recepción en la plataforma, consistente
+            con su bajo desempeño electoral.
+        </p>
+        <p>
+            <strong>3. El sentimiento polariza en las semanas finales.</strong> La última etapa
+            de la campaña vio una caída generalizada del sentimiento positivo, posiblemente
+            relacionada con mayor cobertura de controversias y ataques entre candidatos.
+        </p>
+        <p>
+            <strong>Limitaciones y trabajo futuro:</strong> El análisis usa TextBlob, una herramienta
+            diseñada para inglés. Una mejora significativa sería usar modelos de sentimiento
+            nativos en español. Además, el muestreo no es aleatorio y puede sobre-representar
+            a usuarios con mayor actividad en la plataforma.
+        </p>
+
+        <div class="nota">
+            <strong>Código completo disponible en GitHub:</strong>
+            Los notebooks y el dataset (anonimizado) están disponibles en
+            <a href="https://github.com/daniela-flores-mx/twitter-electoral-2024" target="_blank" rel="noopener">
+                github.com/daniela-flores-mx/twitter-electoral-2024
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- ── Footer ───────────────────────────────────────────────────── -->
+<footer>
+    <p>
+        <strong style="color:#e2e8f0">Daniela Flores Méndez</strong> · Portafolio de análisis de datos
+    </p>
+    <p>
+        <a href="../../">← Volver al portafolio</a>
+        &nbsp;·&nbsp;
+        <a href="https://benjov.github.io/diplomado-cd-ia-acatlan/" target="_blank" rel="noopener">Diplomado FES Acatlán UNAM</a>
+    </p>
+</footer>
+
+</body>
+</html>
