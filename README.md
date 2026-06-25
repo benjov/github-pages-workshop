@@ -19,18 +19,18 @@ En 90 minutos, los asistentes pasan de no tener presencia en internet a tener un
 
 ## Materiales
 
-| Material | Descripción |
-|---|---|
-| [`template/`](template/index.html) | Plantilla HTML lista para personalizar — el entregable principal del workshop |
-| [`guia/`](guia/index.html) | Guía paso a paso ilustrada para seguir a tu ritmo |
-| [`slides/`](slides/index.html) | Slides del workshop (web-based, con syntax highlighting) |
-| [`demo-egresado/`](demo-egresado/index.html) | Ejemplo completo de portafolio de un egresado del diplomado |
+| Material | Ver en línea | Descripción |
+|---|---|---|
+| `template/` | [Abrir plantilla](https://benjov.github.io/github-pages-workshop/template/) | Plantilla HTML lista para personalizar — el entregable principal del workshop |
+| `guia/` | [Abrir guía](https://benjov.github.io/github-pages-workshop/guia/) | Guía paso a paso ilustrada para seguir a tu ritmo |
+| `slides/` | [Abrir slides](https://benjov.github.io/github-pages-workshop/slides/) | Slides del workshop (web-based, con syntax highlighting) |
+| `demo-egresado/` | [Abrir demo](https://benjov.github.io/github-pages-workshop/demo-egresado/) | Ejemplo completo de portafolio de un egresado del diplomado |
 
 ---
 
 ## Cómo usar la plantilla
 
-1. Descarga el archivo [`template/index.html`](template/index.html)
+1. Abre la plantilla en línea: [benjov.github.io/github-pages-workshop/template/](https://benjov.github.io/github-pages-workshop/template/)
 2. Ábrelo en cualquier editor de texto (o directamente en GitHub)
 3. Busca los comentarios `<!-- CAMBIA ESTO: ... -->` y sustituye con tu información
 4. Súbelo a tu repositorio `[tu-usuario].github.io` en GitHub
@@ -62,21 +62,16 @@ No necesitas instalar nada ni saber programar.
 github-pages-workshop/
 ├── README.md
 ├── template/
-│   └── index.html          # Plantilla de página personal
+│   └── index.html              # Plantilla de página personal
 ├── slides/
-│   └── index.html          # Slides del workshop
+│   └── index.html              # Slides del workshop
 ├── guia/
-│   └── index.html          # Guía paso a paso
-├── demo-egresado/
-│   ├── index.html
-│   └── proyectos/
-│       └── analisis-twitter/
-│           └── index.html
-└── assets/
-    ├── css/
-    │   └── shared.css
-    └── img/
-        └── placeholders/
+│   └── index.html              # Guía paso a paso
+└── demo-egresado/
+    ├── index.html              # Portafolio de egresada (ejemplo)
+    └── proyectos/
+        └── analisis-twitter/
+            └── index.html      # Análisis de sentimiento Twitter 2024
 ```
 
 ---
