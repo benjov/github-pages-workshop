@@ -52,6 +52,7 @@ No necesitas instalar nada ni saber programar.
   - Egresados: $20,500 MXN
   - Público general: $22,560 MXN
 - **Más información:** [benjov.github.io/diplomado-cd-ia-acatlan](https://benjov.github.io/diplomado-cd-ia-acatlan/)
+- **Inscripciones 8ª generación:** [educacioncontinua.acatlan.unam.mx](https://educacioncontinua.acatlan.unam.mx/?portfolio=introduccion-a-la-ciencia-de-datos-herramientas-para-el-aprendizaje-automatizado-en-las-ciencias-sociales-y-humanidades) — inicia 15 de agosto de 2026
 - **Contacto:** benjov@ciencias.unam.mx
 
 ---
